@@ -19,13 +19,27 @@ class Observer():
         self.im2_filename = im2_filename
         self.load_images(im1_filename,im2_filename)
         
-    def load_images():
+    def load_images(self, im1_filename, im2_filename):
         '''
         This function is incomplete! It is missing the appropriate input vales
         and the "pass" should be replaced with the appropriate code.
         Update this docstring to explain what the function does (or should do).
         '''
-        pass
+        im1_data = fits.getdata(self.im1_filename)
+        im2_data = fits.getdata(self.im2_filename)
+        file_dict = {self.im1_filename : im1_data[1],
+                    self.im2_filename : im2_data[1]}
+        self.im1_data = im1_data
+        self.im2_data = im2_data
+        self.file_dict = file_dict
+        return file_dict
+    
+    def calc_stats(self):
+        index = list(self.file_dict)
+        for i in index:
+            print("Stats for image", i ,": Mean-", self.file_dict[i].mean() , "Standard deviation-", self.file_dict[i].std())
+    
+    
     
     def make_composite(self):
         '''
@@ -41,3 +55,13 @@ class Observer():
         # Compute the red channel values and then clip them to ensure nothing is > 1.0
         rgb[:,:,0] = 1.5 * (self.im2_data.astype("float")/norm_factor)
         rgb[:,:,0][rgb[:,:,0] > 1.0] = 1.0
+        
+        rgb[:,:,1] = ((self.im1_data.astype("float")+self.im2_data.astype("float"))/2)/norm_factor
+        rgb[:,:,1][rgb[:,:,1] > 1.0] = 1.0
+    
+        rgb[:,:,2] = self.im1_data.astype("float")/norm_factor
+        rgb[:,:,2][rgb[:,:,2] > 1.0] = 1.0
+        
+        
+        
+        plt.imshow(rgb[:,:,:], origin = 'lower')
